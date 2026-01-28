@@ -32,7 +32,7 @@ os.environ['MKL_NUM_THREADS'] = omp_threads
 # )
 # --- 新的代码 (指向你刚才编译好的文件) ---
 # 这里填写你 pw.x 的绝对路径
-QE_PATH = "/root/autodl-tmp/qe-7.2/bin/pw.x"
+QE_PATH = "/home/fan.zhang/qe/q-e-qe-7.5/bin/pw.x"
 
 # 这里的 -np 4 表示用 4 个核并行驱动 QE (根据你显卡和CPU情况调整)
 # 如果是 GPU 版本，通常 -np 1 或者 -np 4 配合 -pool 1 即可
