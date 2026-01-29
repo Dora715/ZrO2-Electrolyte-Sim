@@ -472,6 +472,7 @@ def main():
     qe_manager = QEManager(base_dir, pseudo_dir)  # 实例化 QE 管理器
     results = []  # 初始化结果列表
 
+    chem_pot_o = None
     # =======================================================
     # 【步骤 0】 计算氧结合能 Eb = E(O2) - 2*E(O_atom)
     # =======================================================
@@ -492,9 +493,6 @@ def main():
             'occupations': 'smearing', 
             'smearing': 'gauss',
             'degauss': 0.005,
-        },
-        'electrons': {
-            'mixing_beta': 0.3  # 分子计算标准混合因子
         }
     }
 
@@ -521,13 +519,13 @@ def main():
     try:
         # 1. 计算 O2
         inp_o2 = qe_manager.generate_input(atoms_o2, task_o2, dir_o2, override_data=o2_settings)
-        run_and_monitor(f"mpirun --bind-to none {QE_PATH} -np 1 -nk 1 -input {inp_o2}",
+        run_and_monitor(f"mpirun {QE_PATH} -np 1 -nk 1 -input {inp_o2}",
                         os.path.join(dir_o2, 'espresso.pwo'), task_tag="O2_Ref")
         e_o2 = parse_energy(os.path.join(dir_o2, 'espresso.pwo')) # 这里的返回值单位其实是 eV
 
         # 2. 计算 O 原子
         inp_atom = qe_manager.generate_input(atoms_atom, task_atom, dir_atom, override_data=atom_settings)
-        run_and_monitor(f"mpirun --bind-to none {QE_PATH} -np 1 -nk 1 -input {inp_atom}",
+        run_and_monitor(f"mpirun {QE_PATH} -np 1 -nk 1 -input {inp_atom}",
                         os.path.join(dir_atom, 'espresso.pwo'), task_tag="O_Atom")
         e_atom = parse_energy(os.path.join(dir_atom, 'espresso.pwo')) # eV
 
@@ -545,6 +543,7 @@ def main():
             
     except Exception as e:
         print(f"    ❌ 氧参考态计算失败: {e}")
+        chem_pot_o = None
 
     # 准备任务列表
     all_materials = [
