@@ -12,7 +12,16 @@ from ase import Atoms
 # ==========================================
 # 1. 环境配置 (针对 A100 本地编译版优化)
 # ==========================================
-# --- A. 路径设置 ---
+MPI_ROOT = "/root/autodl-tmp/nvhpc/Linux_x86_64/25.3/comm_libs/12.8/hpcx/latest/ompi"
+NVHPC_BASE = "/root/autodl-tmp/nvhpc/Linux_x86_64/25.3"
+
+os.environ['OPAL_PREFIX'] = MPI_ROOT
+os.environ['PATH'] = f"{MPI_ROOT}/bin:{NVHPC_BASE}/compilers/bin:" + os.environ.get('PATH', '')
+os.environ['LD_LIBRARY_PATH'] = f"{MPI_ROOT}/lib:{NVHPC_BASE}/compilers/lib:" + os.environ.get('LD_LIBRARY_PATH', '')
+
+os.environ['OMPI_ALLOW_RUN_AS_ROOT'] = '1'
+os.environ['OMPI_ALLOW_RUN_AS_ROOT_CONFIRM'] = '1'
+# 3. 修正 QE 路径（确保指向 bin/pw.x）
 QE_PATH = "/root/autodl-tmp/q-e-qe-7.5/bin/pw.x"
 
 # --- B. 硬件资源控制 ---
@@ -28,13 +37,12 @@ os.environ['OMP_NUM_THREADS'] = omp_threads
 os.environ['MKL_NUM_THREADS'] = omp_threads
 
 # --- C. 日志与缓冲优化 (保持不变) ---
-os.environ['PYTHONUNBUFFERED'] = '1'  # Python 实时输出
-os.environ['GFORTRAN_UNBUFFERED_ALL'] = 'y'  # Fortran 实时输出
-os.environ['OMPI_MCA_orte_base_help_aggregate'] = '0'  # 减少 MPI 报错刷屏
+os.environ['PYTHONUNBUFFERED'] = '1'          # Python 实时输出
+os.environ['GFORTRAN_UNBUFFERED_ALL'] = 'y'   # Fortran 实时输出
+os.environ['OMPI_MCA_orte_base_help_aggregate'] = '0' # 减少 MPI 报错刷屏
 
 # --- D.  任务并发控制 ---
 NUM_PARALLEL_TASKS = 2
-
 
 # ==========================================
 # 2. 核心类定义
@@ -112,21 +120,21 @@ class QEManager:
                 'restart_mode': 'from_scratch',
                 'prefix': f'calc_{task_name}',
                 'pseudo_dir': './pseudos',
-                'outdir': './tmp',
+                'outdir': './tmp', 
                 'tprnfor': True,
                 'disk_io': 'none',
                 'verbosity': 'high'
             },
             'system': {
                 'ecutwfc': 60,
-                'ecutrho': 480,
+                'ecutrho': 480,  
                 'occupations': 'smearing',
                 'smearing': 'gaussian',
                 'degauss': 0.005,
             },
             'electrons': {
                 'conv_thr': 1.0e-6,
-                'mixing_beta': 0.3,
+                'mixing_beta': 0.3,  
                 'electron_maxstep': 100,
                 'diagonalization': 'david'
             }
@@ -156,7 +164,6 @@ class QEManager:
               pseudopotentials=needed_pseudos,
               kpts=kpts)  # 设置 K 点网格为 Gamma 点 (1x1x1)
         return input_file  # 返回生成的输入文件路径
-
 
 # 定义环境指纹识别类 (集成自动晶格修复)
 class EnvironmentFingerprinter:
@@ -234,8 +241,6 @@ class EnvironmentFingerprinter:
                 pass
 
         return env_groups
-
-
 # ==========================================
 # 3. 实时监控与解析函数
 # ==========================================
@@ -256,7 +261,7 @@ def run_and_monitor(cmd, output_file_path, task_tag="System"):
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
     )
 
-    with open(output_file_path, "w", buffering=1) as f_log:
+    with open(output_file_path, "w",buffering=1) as f_log:
         while True:
             line = process.stdout.readline()
             if not line and process.poll() is not None: break
@@ -320,7 +325,7 @@ def run_single_material_task(task_args):
     单个材料体系的完整流水线函数 (多进程封装版)
     task_args: 包含 (材料名, 掺杂比例, qe_manager, base_dir, chem_pot_o) 的元组
     """
-    name, ratios, qe_manager, base_dir, chem_pot_o, gpu_id = task_args
+    name, ratios, qe_manager, base_dir, chem_pot_o,gpu_id = task_args
     local_results = []  # 局部结果列表，用于进程间数据收集
     builder = ZrO2Builder()
 
@@ -342,7 +347,7 @@ def run_single_material_task(task_args):
     out_perf = os.path.join(dir_perf, 'espresso.pwo')
 
     # GPU 环境下 MAX_MPI_CORES 建议为 1 (由 multiprocessing 控制并行任务数)
-    cmd_perf = f"mpirun -np 4 {QE_PATH} -nk 4 -input {inp_perf}"
+    cmd_perf = f"mpirun --allow-run-as-root -np 4 {QE_PATH} -nk 4 -input {inp_perf}"
 
     try:
         if not (os.path.exists(out_perf) and "JOB DONE" in open(out_perf, errors='ignore').read()):
@@ -399,7 +404,7 @@ def run_single_material_task(task_args):
             out_vac = os.path.join(dir_vac, 'espresso.pwo')
 
             # 4. 运行计算 (包含 GPU 关键参数 -nb 8)
-            cmd_vac = f"mpirun -np 4 {QE_PATH} -nk 4 -input {inp_vac}"
+            cmd_vac = f"mpirun --allow-run-as-root -np 4 {QE_PATH} -nk 4 -input {inp_vac}"
 
             e_defect = None
             e_final_form = "N/A"
@@ -439,7 +444,6 @@ def run_single_material_task(task_args):
 
     return local_results
 
-
 # ==========================================
 # 4. 主流程
 # ==========================================
@@ -449,6 +453,7 @@ def main():
     print("   包含: O2分子 -> 完美晶胞 -> 环境分析 -> 缺陷晶胞 -> Ef")
     print("===========================================")
 
+    
     # 1. 初始化
     # 创建基于当前时间的运行目录名称
     base_dir = f"./FullRun_{datetime.now().strftime('%Y%m%d_%H%M')}"
@@ -483,12 +488,12 @@ def main():
     dir_o2 = os.path.join(base_dir, task_o2)
     # O2 分子稍微偏离中心，防止高对称性干扰
     atoms_o2 = Atoms('O2', positions=[(7.5, 7.5, 7.5), (7.5, 7.5, 8.73)], cell=[15, 15, 15], pbc=True)
-
+    
     o2_settings = {
         'system': {
             'nspin': 2,
-            'tot_magnetization': 2.0,  # O2 基态是三重态，净自旋为 2
-            'occupations': 'smearing',
+            'tot_magnetization': 2.0,  #O2 基态是三重态，净自旋为 2
+            'occupations': 'smearing', 
             'smearing': 'gauss',
             'degauss': 0.005,
         },
@@ -500,63 +505,63 @@ def main():
     # --- 0.2 计算孤立 O 原子 ---
     task_atom = "O_Atom_Ref"
     dir_atom = os.path.join(base_dir, task_atom)
-
+    
     # 打破对称性！
     # 不要放在 (6,6,6)，放在歪一点的地方，让 p 轨道分裂
     atoms_atom = Atoms('O', positions=[(6.12, 6.23, 6.34)], cell=[12, 12, 12], pbc=True)
-
+    
     atom_settings = {
         'system': {
             'nspin': 2,
             'tot_magnetization': 2.0,  # 强制总磁矩为 2 (Hund规则)
-            'occupations': 'fixed',  # 单原子改用 fixed (如果有报错提示能级交叉，则改回 smearing)
+            'occupations': 'fixed',    # 单原子改用 fixed (如果有报错提示能级交叉，则改回 smearing)
         },
         'electrons': {
-            'mixing_beta': 0.1,  # 降低混合因子，防止电荷震荡
+            'mixing_beta': 0.1,        # 降低混合因子，防止电荷震荡
             'electron_maxstep': 200
         }
     }
 
-    chem_pot_o = None
+    chem_pot_o=None
     try:
         # 1. 计算 O2
         inp_o2 = qe_manager.generate_input(atoms_o2, task_o2, dir_o2, override_data=o2_settings)
-        run_and_monitor(f"mpirun {QE_PATH} -np 1 -nk 1 -input {inp_o2}",
+        run_and_monitor(f"mpirun --allow-run-as-root {QE_PATH} -np 1 -nk 1 -input {inp_o2}",
                         os.path.join(dir_o2, 'espresso.pwo'), task_tag="O2_Ref")
-        e_o2 = parse_energy(os.path.join(dir_o2, 'espresso.pwo'))  # 这里的返回值单位其实是 eV
+        e_o2 = parse_energy(os.path.join(dir_o2, 'espresso.pwo')) # 这里的返回值单位其实是 eV
 
         # 2. 计算 O 原子
         inp_atom = qe_manager.generate_input(atoms_atom, task_atom, dir_atom, override_data=atom_settings)
-        run_and_monitor(f"mpirun {QE_PATH} -np 1 -nk 1 -input {inp_atom}",
+        run_and_monitor(f"mpirun --allow-run-as-root {QE_PATH} -np 1 -nk 1 -input {inp_atom}",
                         os.path.join(dir_atom, 'espresso.pwo'), task_tag="O_Atom")
-        e_atom = parse_energy(os.path.join(dir_atom, 'espresso.pwo'))  # eV
+        e_atom = parse_energy(os.path.join(dir_atom, 'espresso.pwo')) # eV
 
         if e_o2 and e_atom:
             eb = e_o2 - (2 * e_atom)
             chem_pot_o = e_o2 / 2.0
-
+            
             print(f"\n    ----------------------------------------")
-            print(f"    E(O2)   = {e_o2:.4f} eV")
+            print(f"    E(O2)   = {e_o2:.4f} eV") 
             print(f"    E(Atom) = {e_atom:.4f} eV")
             print(f"    ----------------------------------------")
-            print(f"    ★ 氧结合能 Eb: {eb:.4f} eV ")
+            print(f"    ★ 氧结合能 Eb: {eb:.4f} eV ") 
             print(f"    ★ 氧化学势 μ_O: {chem_pot_o:.4f} eV")
             print(f"    ----------------------------------------\n")
-
+            
     except Exception as e:
         print(f"    ❌ 氧参考态计算失败: {e}")
-        chem_pot_o = None
+        chem_pot_o=None
 
     # 准备任务列表
     all_materials = [
-        ("8Sc2YSZ", {"Zr": 90, "Sc": 16, "Y": 4}, "0"),
-        ("7Sc3YSZ", {"Zr": 90, "Sc": 14, "Y": 6}, "1")
+        ("8Sc2YSZ", {"Zr": 90, "Sc": 16, "Y": 4},"0"),
+        ("7Sc3YSZ", {"Zr": 90, "Sc": 14, "Y": 6},"1")
     ]
 
     # 构造传递给任务函数的参数包
     tasks = []
     for name, ratios, gpu_id in all_materials:
-        tasks.append((name, ratios, qe_manager, base_dir, chem_pot_o, gpu_id))
+        tasks.append((name, ratios, qe_manager, base_dir, chem_pot_o,gpu_id))
 
     print(f"\n>>> [并行启动] 使用 Pool 同时启动 {NUM_PARALLEL_TASKS} 个材料计算任务...")
 
@@ -577,7 +582,6 @@ def main():
         df.to_csv(csv_path, index=False)
         print(f"\n✅ 所有任务汇总完成！总计 {len(df)} 条数据。")
         print(f"📊 最终报表已生成: {csv_path}")
-
 
 if __name__ == "__main__":
     main()  # 执行主函数
