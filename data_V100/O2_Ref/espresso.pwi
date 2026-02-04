@@ -1,0 +1,55 @@
+&CONTROL
+   calculation      = 'relax'
+   verbosity        = 'high'
+   restart_mode     = 'from_scratch'
+   nstep            = 100
+   tprnfor          = .true.
+   outdir           = './tmp'
+   prefix           = 'calc_O2_Ref'
+   etot_conv_thr    = 0.0001
+   forc_conv_thr    = 0.001
+   disk_io          = 'none'
+   pseudo_dir       = './pseudos'
+/
+&SYSTEM
+   tot_magnetization = 2.0
+   ecutwfc          = 60
+   ecutrho          = 480
+   occupations      = 'smearing'
+   degauss          = 0.005
+   smearing         = 'gauss'
+   nspin            = 2
+   starting_magnetization(1) = 0.0
+   ntyp             = 1
+   nat              = 2
+   ibrav            = 0
+/
+&ELECTRONS
+   electron_maxstep = 100
+   conv_thr         = 1e-06
+   mixing_beta      = 0.3
+   diagonalization  = 'david'
+/
+&IONS
+/
+&CELL
+/
+&FCP
+/
+&RISM
+/
+ATOMIC_SPECIES
+O  15.999 O.pbe-n-kjpaw_psl.1.0.0.UPF
+
+K_POINTS automatic
+1 1 1  0 0 0
+
+CELL_PARAMETERS angstrom
+15.00000000000000 0.00000000000000 0.00000000000000
+0.00000000000000 15.00000000000000 0.00000000000000
+0.00000000000000 0.00000000000000 15.00000000000000
+
+ATOMIC_POSITIONS angstrom
+O  7.5000000000 7.5000000000 7.5000000000  
+O  7.5000000000 7.5000000000 8.7300000000  
+

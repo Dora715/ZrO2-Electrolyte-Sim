@@ -1,0 +1,33 @@
+&CONTROL
+    calculation      = 'relax'
+    prefix           = 'Zr_metal'
+    pseudo_dir       = './pseudos'
+    outdir           = './tmp'
+    verbosity        = 'high'
+    tprnfor          = .true.
+/
+&SYSTEM
+    ibrav     = 4
+    A         = 3.232
+    C         = 5.147
+    nat       = 2
+    ntyp      = 1
+    ecutwfc   = 60
+    ecutrho   = 480
+    occupations = 'smearing'
+    smearing    = 'gaussian'
+    degauss     = 0.005
+/
+&ELECTRONS
+    conv_thr    = 1e-06
+    mixing_beta = 0.3
+/
+&IONS
+/
+ATOMIC_SPECIES
+Zr 91.224 Zr.pbe-spn-kjpaw_psl.1.0.0.UPF
+ATOMIC_POSITIONS crystal
+Zr 0.333333333 0.666666667 0.250000000
+Zr 0.666666667 0.333333333 0.750000000
+K_POINTS automatic
+12 12 8 0 0 0
