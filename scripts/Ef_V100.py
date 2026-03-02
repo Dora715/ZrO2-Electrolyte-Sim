@@ -25,11 +25,6 @@ os.environ['OMPI_ALLOW_RUN_AS_ROOT_CONFIRM'] = '1'
 QE_PATH = "/root/autodl-tmp/q-e-qe-7.5/bin/pw.x"
 
 # --- B. 硬件资源控制 ---
-
-# OMP_NUM_THREADS 设定逻辑：
-# 你的策略是：单卡跑 4 个 MPI 进程 (为了并行算 K 点)
-# 假设你的 CPU 有 32 个核以上。建议每个 MPI 进程分配 4~8 个线程。
-# 推荐设置为 '4' (即总占用 4进程 * 4线程 = 16 CPU核心，比较稳健)
 omp_threads = '2'
 
 # 注入环境变量
