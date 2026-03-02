@@ -1,0 +1,72 @@
+.
+├── 1Sc_3Zr.log
+├── Em_T.py
+├── pseudos
+│   ├── O.pbe-n-kjpaw_psl.1.0.0.UPF
+│   ├── Sc.pbe-spn-kjpaw_psl.1.0.0.UPF
+│   ├── Y.pbe-spn-kjpaw_psl.1.0.0.UPF
+│   └── Zr.pbe-spn-kjpaw_psl.1.0.0.UPF
+└── test_data
+    ├── 10ScSZ_NEB_800C_1Sc_3Zr
+    │   └── IS_Relax
+    │       ├── is_10ScSZ_Vac_1Sc_3Zr.bfgs
+    │       ├── is_10ScSZ_Vac_1Sc_3Zr.out
+    │       ├── is_10ScSZ_Vac_1Sc_3Zr.pwi
+    │       ├── is_10ScSZ_Vac_1Sc_3Zr.save
+    │       │   ├── charge-density.dat
+    │       │   ├── data-file-schema.xml
+    │       │   └── paw.txt
+    │       └── is_10ScSZ_Vac_1Sc_3Zr.update
+    ├── 10ScSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_10ScSZ_Perfect
+    ├── 10ScSZ_Vac_1Sc_3Zr
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_10ScSZ_Vac_1Sc_3Zr
+    ├── 5Sc5YSZ_NEB_800C_1Sc_3Zr
+    ├── 5Sc5YSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_5Sc5YSZ_Perfect
+    ├── 5Sc5YSZ_Vac_1Sc_3Zr
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_5Sc5YSZ_Vac_1Sc_3Zr
+    ├── 6Sc4YSZ_NEB_800C_1Sc_3Zr
+    ├── 6Sc4YSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_6Sc4YSZ_Perfect
+    ├── 6Sc4YSZ_Vac_1Sc_3Zr
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_6Sc4YSZ_Vac_1Sc_3Zr
+    ├── 7Sc3YSZ_NEB_800C_1Sc_3Zr
+    ├── 7Sc3YSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_7Sc3YSZ_Perfect
+    ├── 7Sc3YSZ_Vac_1Sc_3Zr
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_7Sc3YSZ_Vac_1Sc_3Zr
+    ├── 8Sc2YSZ_NEB_800C_1Sc_3Zr
+    ├── 8Sc2YSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_8Sc2YSZ_Perfect
+    ├── 8Sc2YSZ_Vac_1Sc_3Zr
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_8Sc2YSZ_Vac_1Sc_3Zr
+    ├── 9Sc1YSZ_NEB_800C_1Sc_3Zr
+    ├── 9Sc1YSZ_Perfect
+    │   ├── espresso.pwi
+    │   ├── espresso.pwo
+    │   └── tmp_9Sc1YSZ_Perfect
+    └── 9Sc1YSZ_Vac_1Sc_3Zr
+        ├── espresso.pwi
+        ├── espresso.pwo
+        └── tmp_9Sc1YSZ_Vac_1Sc_3Zr
