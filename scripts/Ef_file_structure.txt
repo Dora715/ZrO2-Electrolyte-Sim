@@ -1,0 +1,8 @@
+.
+├── Ef_V100.py
+├── pseudos
+│   ├── O.pbe-n-kjpaw_psl.1.0.0.UPF
+│   ├── Sc.pbe-spn-kjpaw_psl.1.0.0.UPF
+│   ├── Y.pbe-spn-kjpaw_psl.1.0.0.UPF
+│   └── Zr.pbe-spn-kjpaw_psl.1.0.0.UPF
+├── run.log
