@@ -1,0 +1,13 @@
+1、运行代码finder.py确定要迁移的氧原子以及氧空位坐标；
+  
+2、根据迁移的氧原子以及氧空位坐标补全auto_fs_maker.py中的system_config字典；
+  
+3、运行代码auto_fs_maker.py得到初态和终态文件IS.in、FS.in；
+
+4、分别进入到对应材料的文件夹下对终态进行结构弛豫，执行指令如下，
+  mpirun --allow-run-as-root -np 4 pw.x -input FS.in > FS.out &
+
+5、运行代码auto_neb_maker.py得到NEB输入文件；
+
+6、分别进入到对应材料的文件夹下进行能垒计算，执行指令如下，
+  mpirun --allow-run-as-root -np 4 pw.x -input neb.in > neb.out &
